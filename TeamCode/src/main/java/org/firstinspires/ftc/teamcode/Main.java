@@ -18,22 +18,28 @@ public class Main extends LinearOpMode {
         rightFront.setDirection(DcMotorSimple.Direction.REVERSE);
         waitForStart();
 
-        double power;
+        double frente;
+        double giro;
+        double lado;
 
         while (opModeIsActive()){
 
-            if(gamepad1.y){
+            /*if(gamepad1.y){
                 power = 0.3;
             }else if(gamepad1.a){
                 power = -0.3;
             }else{
                 power = 0.0;
-            }
+            }*/
 
-            leftFront.setPower(power);
-            leftBack.setPower(power);
-            rightFront.setPower(power);
-            rightBack.setPower(power);
+            frente = gamepad1.left_stick_y * 0.5;
+            giro = gamepad1.right_stick_x * 0.5;
+            lado = - gamepad1.left_stick_x * 0.5;
+
+            leftFront.setPower(frente + giro + lado);
+            leftBack.setPower(frente + giro -lado);
+            rightFront.setPower(frente -giro -lado);
+            rightBack.setPower(frente -giro +lado);
         }
     }
 }
