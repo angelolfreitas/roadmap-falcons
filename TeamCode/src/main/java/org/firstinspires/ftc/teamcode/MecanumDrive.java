@@ -64,7 +64,7 @@ public final class MecanumDrive {
 
         // drive model parameters
         public double inPerTick = 118.11 / 40205;
-        public double lateralInPerTick = 88.75229307056038;
+        public double lateralInPerTick = 180;
         public double trackWidthTicks = 3579.5864151452324;
 
         // feedforward parameters (in tick units)
@@ -82,19 +82,19 @@ public final class MecanumDrive {
         public double maxAngAccel = Math.PI;
 
         // path controller gains
-        public double axialGain = 0.0;
-        public double lateralGain = 0.0;
-        public double headingGain = 0.0; // shared with turn
+        public double axialGain = 8; //6;
+        public double lateralGain = 6.5; //6;
+        public double headingGain = 7; //5; // shared with turn
 
-        public double axialVelGain = 0.0;
-        public double lateralVelGain = 0.0;
-        public double headingVelGain = 0.0; // shared with turn
+        public double axialVelGain = 1.2;
+        public double lateralVelGain = 0.4;
+        public double headingVelGain = 0.6; // sh
     }
 
     public static Params PARAMS = new Params();
 
     public final MecanumKinematics kinematics = new MecanumKinematics(
-            PARAMS.inPerTick * PARAMS.trackWidthTicks, PARAMS.inPerTick / PARAMS.lateralInPerTick);
+            PARAMS.inPerTick * PARAMS.trackWidthTicks, PARAMS.inPerTick * PARAMS.lateralInPerTick);
 
     public final TurnConstraints defaultTurnConstraints = new TurnConstraints(
             PARAMS.maxAngVel, -PARAMS.maxAngAccel, PARAMS.maxAngAccel);
@@ -307,14 +307,7 @@ public final class MecanumDrive {
                 t = Actions.now() - beginTs;
             }
 
-            if (t >= timeTrajectory.duration) {
-                leftFront.setPower(0);
-                leftBack.setPower(0);
-                rightBack.setPower(0);
-                rightFront.setPower(0);
 
-                return false;
-            }
 
             Pose2dDual<Time> txWorldTarget = timeTrajectory.get(t);
             targetPoseWriter.write(new PoseMessage(txWorldTarget.value()));
@@ -354,6 +347,15 @@ public final class MecanumDrive {
             p.put("xError", error.position.x);
             p.put("yError", error.position.y);
             p.put("headingError (deg)", Math.toDegrees(error.heading.toDouble()));
+
+            if (t >= timeTrajectory.duration && error.position.x<0.5 && error.position.y<0.5) {
+                leftFront.setPower(0);
+                leftBack.setPower(0);
+                rightBack.setPower(0);
+                rightFront.setPower(0);
+
+                return false;
+            }
 
             // only draw when active; only one drive action should be active at a time
             Canvas c = p.fieldOverlay();
